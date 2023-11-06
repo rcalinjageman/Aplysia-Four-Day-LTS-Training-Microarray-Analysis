@@ -41,6 +41,9 @@
 # * Added planned interaction test from d1 to d11 (planned but had not been
 #   included in original script due to uncertainty if funding would permit
 #   d11 to be run).
+# * Added some additional scripting to pull together outputs into one file.  
+#   And fixed output of MA2avg to csv and ordered targets by condition.
+#
 #
 # Notes from pre-registered analysis script --------------------------------
 # This is a pre-planned analysis script for a project (https://osf.io/wvx6z/) 
@@ -187,6 +190,7 @@
 # -----------------
   # Read targets, load sample sizes, and read raw data
   targets <- readTargets(runparams[[runtype]]$targets, row.names = "Name")
+  targets <- targets[order(targets$Name), ]
   RG <- read.maimages(targets, source="agilent.median", path=runparams[[runtype]]$arraydir)
 
   # Now load and read the targets from 1 day after a shorter LTS protocol.
@@ -217,7 +221,7 @@
       }
   MA2avg <- avereps(MA2, ID=MA2$genes$GeneName)
   # Save MA2 table - again, dye assignment is not corrected
-  write.table(MA2avg, file=paste("./output/", runparams[[runtype]]$prefix, " - MA2avg.txt", sep = ""))
+  write.table(MA2avg, file=paste("./output/", runparams[[runtype]]$prefix, " - MA2avg.csv", sep = ""), sep = ",")
   # Plot MDS of all samples
     # Note we use dye swaps so samples will cluster not only by condition but also by dye assignment
   plotMDS(MA2avg, labels = targets$Name)
@@ -680,4 +684,65 @@
       repplot
       ggsave(plot = repplot, filename = paste("./output/", runparams[[runtype]]$prefix, " - d1 vs d1replication.jpg", sep = ""))    
   
+
+# -----------------------------------------------------------------------------
+# The code below was added to the pre-registered script to organize a master
+#   output file.  It does not change/alter/add to pre-registered analyses.
+#
+      
+      # Grab the data from the MAavg object
+      MAread<- as.data.frame(MA2avg$M)
+
+      # Update column names to match sample names rather than slide file names
+      colnames(MAread) <- targets$Name
+
+      # Update MA table for dye swaps
+      targets$swapweight <- 1
+      targets[targets$Cy3 != "Control", ]$swapweight <- -1
+      MAread <- as.data.frame(t(t(MAread) * targets$swapweight))
+      
+      # Now combine MA table with statistical analyses
+      # Remake results table, just in case
+      resultsTable <- list(
+        d1 = topTreat(fit, coef="d1", number=nrow(fit), adjust.method="BH"),
+        d5 = topTreat(fit, coef="d5", number=nrow(fit), adjust.method="BH"),
+        d11 = topTreat(fit, coef="d11", number=nrow(fit), adjust.method="BH"),
+        d1_rep = topTreat(fit, coef="d1rep", number=nrow(fit), adjust.method="BH")
+      )
+      int_list <- topTreat(int_fit, coef="d5vd1", number=nrow(int_fit), adjust.method="BH")
+      int_list_d11 <- topTreat(int_fit_d11, coef="d11vd1", number=nrow(int_fit), adjust.method="BH")
+      
+      # Rename analysis column names
+      colnames(resultsTable$d1) <- paste("d1_", colnames(resultsTable$d1), sep = "")
+      colnames(resultsTable$d5) <- paste("d5_", colnames(resultsTable$d5), sep = "")
+      colnames(resultsTable$d11) <- paste("d11_", colnames(resultsTable$d11), sep = "")
+      colnames(resultsTable$d1_rep) <- paste("d1_rep_", colnames(resultsTable$d1_rep), sep = "")
+      colnames(int_list) <- paste("int_d1_d5_", colnames(int_list), sep = "")
+      colnames(int_list_d11) <- paste("int_d1_d11_", colnames(int_list_d11), sep = "")
+      
+      MAread$SystematicName <- row.names(MAread)
+      
+      
+      MAread <- merge(MAread, resultsTable$d1[ , c(5, 7:11)], by.x = "SystematicName", by.y = "d1_SystematicName", all.y = TRUE, all.x = TRUE)
+      MAread <- merge(MAread, resultsTable$d5[ , c(5, 7:11)], by.x = "SystematicName", by.y = "d5_SystematicName", all.y = TRUE, all.x = TRUE)
+      MAread <- merge(MAread, resultsTable$d11[ , c(5, 7:11)], by.x = "SystematicName", by.y = "d11_SystematicName", all.y = TRUE, all.x = TRUE)
+      MAread <- merge(MAread, resultsTable$d1_rep[ , c(5, 7:11)], by.x = "SystematicName", by.y = "d1_rep_SystematicName", all.y = TRUE, all.x = TRUE)
+      MAread <- merge(MAread, int_list[ , c(5, 7:11)], by.x = "SystematicName", by.y = "int_d1_d5_SystematicName", all.y = TRUE, all.x = TRUE)
+      MAread <- merge(MAread, int_list_d11[ , c(5, 7:11)], by.x = "SystematicName", by.y = "int_d1_d11_SystematicName", all.y = TRUE, all.x = TRUE)
+      
+      # Define which transcripts were previously identified as upregulated 1 
+      #   day after a 1-day protocol
+      restricted = read.csv("refined_24h.txt")
+      MAread$previous <- MAread$SystematicName %in% restricted$Transcripts
+      
+      
+      # Calculate own means for each time point
+      MAread$d1_mean <- rowMeans(MAread[ , 2:8])
+      MAread$d11_mean <- rowMeans(MAread[ , 9:16])
+      MAread$d1_rep_mean <- rowMeans(MAread[ , 17:24])
+      MAread$d5_mean <- rowMeans(MAread[ , 25:32])
+      
+      # Write the full output
+      write.csv(MAread, file=paste("./output/", runparams[[runtype]]$prefix, " - all_output.csv", sep = ""))
+
       
