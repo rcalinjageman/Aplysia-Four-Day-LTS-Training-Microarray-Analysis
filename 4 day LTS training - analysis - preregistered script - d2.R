@@ -38,6 +38,9 @@
 #   fixed flaw in that function that allowed negative proportions of false
 #   negatives to be returned.
 # * Fixed error in build of table 1
+# * Added planned interaction test from d1 to d11 (planned but had not been
+#   included in original script due to uncertainty if funding would permit
+#   d11 to be run).
 #
 # Notes from pre-registered analysis script --------------------------------
 # This is a pre-planned analysis script for a project (https://osf.io/wvx6z/) 
@@ -332,11 +335,22 @@
     int_fit <- contrasts.fit(fit_1donly, contrast.matrix)
     int_fit <- treat(int_fit, lfc=log2(1.1), trend=TRUE)
     int_list <- topTreat(int_fit, coef="d5vd1", number=nrow(int_fit), adjust.method="BH")
-    write.csv(int_list, file = paste("./output/", runparams[[runtype]]$prefix, " - Table - w1_sav interaction gene list.csv", sep = ""))
+    write.csv(int_list, file = paste("./output/", runparams[[runtype]]$prefix, " - Table - d5_d1 interaction gene list.csv", sep = ""))
     int_regulated <- nrow(int_list[int_list$adj.P.Val < .05, ])
     print(paste("Number of transcripts at d5 regulated differently than at d1: ", int_regulated))
     
+
+    # Make a contrast matrix for comparing d1 and d5
+    contrast.matrix.d11 <- makeContrasts(d11vd1=d11-d1, levels=c("Plate", "Dye", "d1", "d11", "d1rep","d5"))
+    # Now analyze using contrasts.fit and the fit_1donly object which has only the transcripts regulated at 1d
+    int_fit_d11 <- contrasts.fit(fit_1donly, contrast.matrix.d11)
+    int_fit_d11 <- treat(int_fit_d11, lfc=log2(1.1), trend=TRUE)
+    int_list_d11 <- topTreat(int_fit_d11, coef="d11vd1", number=nrow(int_fit), adjust.method="BH")
+    write.csv(int_list_d11, file = paste("./output/", runparams[[runtype]]$prefix, " - Table - d11_d1 interaction gene list.csv", sep = ""))
+    int_regulated_d11 <- nrow(int_list_d11[int_list_d11$adj.P.Val < .05, ])
+    print(paste("Number of transcripts at d11 regulated differently than at d1: ", int_regulated_d11))
     
+        
     
     #Now, let's get the proportion of d1 and d5 overlap and compare these proportions
     # Store a temporary copies of the d1, d5, and d11 results
