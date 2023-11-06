@@ -34,6 +34,9 @@
 # * Updated notes
 # * Updated params for real analysis, Targets.txt for slide names, and
 #    sample size for 1-day due to one slide being omitted for a processing error.
+# * Updated call to falseNegativeCount (wrong arguments were being passed) and
+#   fixed flaw in that function that allowed negative proportions of false
+#   negatives to be returned.
 #
 # Notes from pre-registered analysis script --------------------------------
 # This is a pre-planned analysis script for a project (https://osf.io/wvx6z/) 
@@ -133,6 +136,8 @@
     phit <- nrow(resultsTable[resultsTable$adj.P.Val < .05, ]) / total
     # Now estimate proportion falsenegatives
     fn <- 1 - pTrueNull - phit
+    # Updated to avoid negative estimates of false negatives
+    if (fn < 0) fn <- 0
     # Finally, calculate total number of possible misses
     fnTotal <- fn * total
     # Make a list to return results
@@ -278,9 +283,9 @@
   # For each condition, estimate the false negative (misses) proportion and counts
     falseNegatives <- list(
       d1 = falseNegativeCount(resultsTable$d1),
-      w1 = falseNegativeCount(resultsTable$w1),
-      sav = falseNegativeCount(resultsTable$sav),
-      d1rep = falseNegativeCount(resultsTable$d1_rep)
+      d5 = falseNegativeCount(resultsTable$d5),
+      d1 = falseNegativeCount(resultsTable$d11),
+      d1_rep = falseNegativeCount(resultsTable$d1_rep)
     )
 
   
