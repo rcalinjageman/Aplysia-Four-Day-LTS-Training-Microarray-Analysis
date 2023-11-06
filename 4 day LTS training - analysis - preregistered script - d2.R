@@ -1,5 +1,6 @@
 # Planned analysis of 4-day LTS training microarray 
-# v1.1  - Bob Calin-Jageman, 7/1/2022
+# v1.1  - Bob Calin-Jageman, 7/1/2022 - Preregistered Script
+# v1.2  - Bob Calin-Jageman, 11/5/2023 - Final params for real analysis
 
 # Things to be updated after data collections:
 # * We may update the microarry platform based on long-read sequencing.
@@ -7,13 +8,30 @@
 #   will need to be re-keyed to the updated array, or if that is not possible
 #   that comparison condition will be dropped.  It is only serving as a reference
 #   to help anchor evaluation of similarity between the 1 day and 5 day timepoints
+#
+#   - No updates were made to the microarray platform
+#
+#
 # * Funding may not permit running the 11-day microarray.  If so, 
 #   all analyses with the 11-day data will be deleted
+#
+#   - 11-day was completed; adjustments made below for those analyses
+#
 # * Normexp offset has to be adjusted manually after seeing the MA plots
 # * Some graph parameters will need to be adjusted (e.g. x/y limits) based on
 #   data obtained
+#
+#   - No updates needed
 
 #Notes
+# For final data analysis --------------------------------------------------
+# This script contains minor (documented) updates to our pre-registered
+#  microarray analysis plan to enable it to run with the real data.
+#  To document all changes, the script and analysis files were published to
+#  github, and all changes committed/explained:
+#  https://github.com/rcalinjageman/Aplysia-Four-Day-LTS-Training-Microarray-Analysis
+#
+# Notes from pre-registered analysis script --------------------------------
 # This is a pre-planned analysis script for a project (https://osf.io/wvx6z/) 
 #  examining the transcriptional changes that accompany maintenance of a very
 #  long lasting form of sensitization in Aplysia.
