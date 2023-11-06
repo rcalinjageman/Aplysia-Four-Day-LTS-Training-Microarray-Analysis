@@ -37,6 +37,7 @@
 # * Updated call to falseNegativeCount (wrong arguments were being passed) and
 #   fixed flaw in that function that allowed negative proportions of false
 #   negatives to be returned.
+# * Fixed error in build of table 1
 #
 # Notes from pre-registered analysis script --------------------------------
 # This is a pre-planned analysis script for a project (https://osf.io/wvx6z/) 
@@ -284,7 +285,7 @@
     falseNegatives <- list(
       d1 = falseNegativeCount(resultsTable$d1),
       d5 = falseNegativeCount(resultsTable$d5),
-      d1 = falseNegativeCount(resultsTable$d11),
+      d11 = falseNegativeCount(resultsTable$d11),
       d1_rep = falseNegativeCount(resultsTable$d1_rep)
     )
 
@@ -301,8 +302,8 @@
     # Store results from the decide test... not very elegant, but rtable comes out as some type of table and as.data.frame doesn't work well on it
     table1$up_regulated <- c(rtable["Up", "d1"], rtable["Up", "d5"], rtable["Up", "d11"], rtable["Up", "d1rep"])
     table1$down_regulated <- c(rtable["Down", "d1"], rtable["Down", "d5"], rtable["Down","d11"], rtable["Down", "d1rep"])
-    table1$false_negative_rate <- c(falseNegatives$d1$fn, falseNegatives$d5$fn, falseNegatives$d11$fn, falseNegatives$d1rep$fn)
-    table1$false_negative_count <- c(falseNegatives$d1$fnTotal, falseNegatives$d5$fnTotal, falseNegatives$d11$fnTotal, falseNegatives$d1rep$fnTotal)
+    table1$false_negative_rate <- c(falseNegatives$d1$fn, falseNegatives$d5$fn, falseNegatives$d11$fn, falseNegatives$d1_rep$fn)
+    table1$false_negative_count <- c(falseNegatives$d1$fnTotal, falseNegatives$d5$fnTotal, falseNegatives$d11$fnTotal, falseNegatives$d1_rep$fnTotal)
     table1
     write.csv(table1, file = paste("./output/", runparams[[runtype]]$prefix, " - Table 1 - gene list counts.csv", sep = ""))  
   
