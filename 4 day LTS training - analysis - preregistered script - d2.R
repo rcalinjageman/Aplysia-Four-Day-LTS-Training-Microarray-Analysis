@@ -31,6 +31,10 @@
 #  github, and all changes committed/explained:
 #  https://github.com/rcalinjageman/Aplysia-Four-Day-LTS-Training-Microarray-Analysis
 #
+# * Updated notes
+# * Updated params for real analysis, Targets.txt for slide names, and
+#    sample size for 1-day due to one slide being omitted for a processing error.
+#
 # Notes from pre-registered analysis script --------------------------------
 # This is a pre-planned analysis script for a project (https://osf.io/wvx6z/) 
 #  examining the transcriptional changes that accompany maintenance of a very
@@ -146,7 +150,7 @@
   # The runtype variable enables this script to switch between sample/test and real runs
   # Set runtpe to be Test or Real 
   runtype <- "Real"
-  runtype <- "Test"
+  #runtype <- "Test"
 
   # runparams stores the different parameters for the different types of runs
   # Parameters for running the script
@@ -161,7 +165,7 @@
       prefix = "Real",
       targets = "Targets.txt",
       arraydir = "arraydata",
-      nCondition <- c(8,8,8,8)
+      nCondition <- c(7,8,8,8)
     )
   )
   nCondition <- runparams[[runtype]][[4]]
